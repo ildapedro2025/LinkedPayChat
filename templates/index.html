@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Lpay FAQ Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      display: flex;
+      align-items: flex-end;
+      margin: 10px 0;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .message.fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .user-msg {
+      justify-content: flex-end;
+    }
+
+    .bot-msg {
+      justify-content: flex-start;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin: 0 10px;
+    }
+
+    .bubble {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      line-height: 1.5;
+    }
+
+    .user-msg .bubble {
+      background-color: #0084ff;
+      color: white;
+      border-bottom-right-radius: 0;
+    }
+
+    .bot-msg .bubble {
+      background-color: #e5e5ea;
+      color: black;
+      border-bottom-left-radius: 0;
+    }
+
+    form {
+      display: flex;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+    }
+
+    input[type="submit"] {
+      padding: 10px 20px;
+      background-color: #0084ff;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #006fe0;
+    }
+
+    /* CURSOR PISCANDO */
+    .cursor {
+      font-weight: bold;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h2>Assistente Virtual Lpay</h2>
+
+    <div class="messages" id="chat-scroll">
+    {% for item in historico %}
+      <div class="message user-msg fade-in">
+        <div class="bubble">{{ item.pergunta }}</div>
+        <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" alt="Usuário" class="avatar">
+      </div>
+
+      {% if loop.last %}
+      <div class="message bot-msg fade-in" id="bot-msg">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" alt="Bot" class="avatar">
+        <div class="bubble" id="botResponse">Digitando<span id="dots">.</span><span class="cursor">|</span></div>
+      </div>
+
+      <script>
+        const resposta = `{{ item.resposta.replace('\n', '<br>')|safe }}`;
+        let dots = document.getElementById("dots");
+        let count = 0;
+
+        const interval = setInterval(() => {
+          dots.textContent = ".".repeat((count % 3) + 1);
+          count++;
+        }, 400);
+
+        setTimeout(() => {
+          clearInterval(interval);
+          const botResponseDiv = document.getElementById("botResponse");
+          botResponseDiv.innerHTML = resposta;
+
+          // Toca som de notificação
+          const audio = new Audio("https://www.myinstants.com/media/sounds/iphone-notification.mp3");
+          audio.play();
+        }, 1500);
+      </script>
+      {% else %}
+      <div class="message bot-msg fade-in">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" alt="Bot" class="avatar">
+        <div class="bubble">{{ item.resposta.replace('\n', '<br>')|safe }}</div>
+      </div>
+      {% endif %}
+    {% endfor %}
+    </div>
+
+    <form method="post">
+      <input type="text" name="pergunta" placeholder="Digite sua pergunta..." required>
+      <input type="submit" value="Enviar">
+    </form>
+  </div>
+
+  <script>
+    // Scroll automático e animação das mensagens
+    window.onload = function () {
+      const chat = document.getElementById("chat-scroll");
+      chat.scrollTop = chat.scrollHeight;
+
+      const msgs = document.querySelectorAll('.message');
+      msgs.forEach((msg, index) => {
+        setTimeout(() => {
+          msg.classList.add('fade-in');
+        }, index * 100);
+      });
+    }
+  </script>
+</body>
+</html>

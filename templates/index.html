@@ -2,37 +2,80 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lpay FAQ Bot</title>
   <style>
+    :root {
+      --bg: #ffffff;
+      --text: #333333;
+      --user-bubble: #4f9eed;
+      --bot-bubble: #f1f1f1;
+      --input-bg: #ffffff;
+      --input-border: #cccccc;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1e;
+        --text: #e4e4e4;
+        --user-bubble: #2b6cb0;
+        --bot-bubble: #2d2d30;
+        --input-bg: #2c2c2e;
+        --input-border: #444;
+        --shadow: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
       margin: 0;
       padding: 0;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     .chat-container {
       width: 100%;
-      max-width: 600px;
-      margin: 40px auto;
-      background-color: #fff;
-      border-radius: 10px;
+      max-width: 480px;
+      height: 90vh;
+      background-color: var(--bg);
+      border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 24px var(--shadow);
       display: flex;
       flex-direction: column;
-      height: 80vh;
     }
 
-    h2 {
+    h3 {
       text-align: center;
+      margin-bottom: 12px;
+      font-size: 1.3rem;
     }
 
     .messages {
       flex: 1;
       overflow-y: auto;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       scroll-behavior: smooth;
+      padding-right: 6px;
+    }
+
+    .messages::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .messages::-webkit-scrollbar-thumb {
+      background-color: #999;
+      border-radius: 4px;
     }
 
     .message {
@@ -41,7 +84,7 @@
       margin: 10px 0;
       opacity: 0;
       transform: translateY(10px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
     .message.fade-in {
@@ -58,58 +101,63 @@
     }
 
     .avatar {
-      width: 40px;
-      height: 40px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      margin: 0 10px;
+      margin: 0 8px;
     }
 
     .bubble {
-      max-width: 70%;
-      padding: 10px 15px;
-      border-radius: 20px;
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
       line-height: 1.5;
+      font-size: 14px;
+      word-wrap: break-word;
     }
 
     .user-msg .bubble {
-      background-color: #0084ff;
+      background-color: var(--user-bubble);
       color: white;
-      border-bottom-right-radius: 0;
+      border-bottom-right-radius: 4px;
     }
 
     .bot-msg .bubble {
-      background-color: #e5e5ea;
-      color: black;
-      border-bottom-left-radius: 0;
+      background-color: var(--bot-bubble);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
     }
 
     form {
       display: flex;
+      gap: 10px;
     }
 
     input[type="text"] {
       flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
+      padding: 10px 14px;
+      border: 1px solid var(--input-border);
+      background-color: var(--input-bg);
+      color: var(--text);
       border-radius: 20px;
       outline: none;
+      font-size: 14px;
     }
 
     input[type="submit"] {
-      padding: 10px 20px;
-      background-color: #0084ff;
+      padding: 10px 18px;
+      background-color: var(--user-bubble);
       color: white;
       border: none;
       border-radius: 20px;
-      margin-left: 10px;
       cursor: pointer;
+      font-weight: bold;
     }
 
     input[type="submit"]:hover {
-      background-color: #006fe0;
+      background-color: #3c86d4;
     }
 
-    /* CURSOR PISCANDO */
     .cursor {
       font-weight: bold;
       animation: blink 1s infinite;
@@ -119,16 +167,29 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
     }
+
+    @media screen and (max-width: 500px) {
+      .chat-container {
+        height: 95vh;
+        padding: 15px;
+      }
+      h3 {
+        font-size: 1.1rem;
+      }
+      .bubble {
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="chat-container">
-    <h2>Assistente Virtual Lpay</h2>
+    <h3>🤖 Assistente Virtual Lpay</h3>
 
     <div class="messages" id="chat-scroll">
     {% for item in historico %}
       <div class="message user-msg fade-in">
-        <div class="bubble">{{ item.pergunta }}</div>
+        <div class="bubble">🙋‍♀️ {{ item.pergunta }}</div>
         <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" alt="Usuário" class="avatar">
       </div>
 
@@ -139,7 +200,7 @@
       </div>
 
       <script>
-        const resposta = `{{ item.resposta.replace('\n', '<br>')|safe }}`;
+        const resposta = `🤖 {{ item.resposta.replace('\n', '<br>')|safe }}`;
         let dots = document.getElementById("dots");
         let count = 0;
 
@@ -153,7 +214,6 @@
           const botResponseDiv = document.getElementById("botResponse");
           botResponseDiv.innerHTML = resposta;
 
-          // Toca som de notificação
           const audio = new Audio("https://www.myinstants.com/media/sounds/iphone-notification.mp3");
           audio.play();
         }, 1500);
@@ -161,7 +221,7 @@
       {% else %}
       <div class="message bot-msg fade-in">
         <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" alt="Bot" class="avatar">
-        <div class="bubble">{{ item.resposta.replace('\n', '<br>')|safe }}</div>
+        <div class="bubble">🤖 {{ item.resposta.replace('\n', '<br>')|safe }}</div>
       </div>
       {% endif %}
     {% endfor %}
@@ -174,7 +234,6 @@
   </div>
 
   <script>
-    // Scroll automático e animação das mensagens
     window.onload = function () {
       const chat = document.getElementById("chat-scroll");
       chat.scrollTop = chat.scrollHeight;

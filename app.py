@@ -7,8 +7,8 @@ import string
 app = Flask(__name__)
 app.secret_key = "sua_chave_secreta_super_segura"
 
-# Carrega o modelo spaCy
-nlp = spacy.load("pt_core_news_md")  # use pt_core_news_lg se tiver
+# Carrega o modelo spaCy grande
+nlp = spacy.load("pt_core_news_lg")
 
 def normalizar_texto(texto):
     texto = texto.lower().strip()
@@ -25,27 +25,39 @@ def encontrar_resposta(pergunta_usuario):
     respostas_encontradas = []
 
     for pergunta, info in faq.items():
-        tags = info["tags"]
         melhor_similaridade = 0
-
-        for tag in tags:
+        for tag in info["tags"]:
             tag_doc = nlp(normalizar_texto(tag))
             similaridade = doc_usuario.similarity(tag_doc)
             if similaridade > melhor_similaridade:
                 melhor_similaridade = similaridade
 
-        if melhor_similaridade > 0.75:  # ajuste conforme necessário
-            respostas_encontradas.append({
-                "pergunta": pergunta,
-                "resposta": info["resposta"],
-                "similaridade": melhor_similaridade
-            })
+        respostas_encontradas.append({
+            "pergunta": pergunta,
+            "resposta": info["resposta"],
+            "similaridade": melhor_similaridade
+        })
 
-    if respostas_encontradas:
-        respostas_encontradas.sort(key=lambda x: x["similaridade"], reverse=True)
-        return respostas_encontradas[0]["resposta"]
+    respostas_encontradas.sort(key=lambda x: x["similaridade"], reverse=True)
+    melhor_resposta = respostas_encontradas[0]
+
+    # Se a similaridade for alta, retorna a resposta normalmente
+    if melhor_resposta["similaridade"] >= 0.75:
+        return melhor_resposta["resposta"]
+    
+    # Se for moderada, responde com empatia e sugestão
+    elif 0.60 <= melhor_resposta["similaridade"] < 0.75:
+        return (
+            f"Não tenho certeza, mas talvez esteja a perguntar sobre: "
+            f"\"{melhor_resposta['pergunta']}\". {melhor_resposta['resposta']}"
+        )
+    
+    # Se for muito baixa, sugere reformular
     else:
-        return "Desculpe, não encontrei uma resposta relacionada a isso."
+        return (
+            "Desculpe, ainda não sei responder a essa pergunta. "
+            "Você pode tentar reformular ou me perguntar algo sobre pagamentos, agentes ou contas."
+        )
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -57,7 +69,7 @@ def index():
         resposta = encontrar_resposta(pergunta)
 
         session["historico"].append({"pergunta": pergunta, "resposta": resposta})
-        session.modified = False
+        session.modified = True  # Atualiza o histórico na sessão
 
     return render_template("index.html", historico=session["historico"])
 

@@ -24,7 +24,7 @@ murmurhash==1.0.12
 numpy==2.2.5
 packaging==25.0
 preshed==3.0.9
-pt_core_news_lg @ file:///C:/Users/ilda.pedro/Documents/Projecto%20Pay/pt_core_news_lg-3.8.0.tar.gz#sha256=edb00a69e043c35be4ea354d5fc3dc24b72df433051c9da814192df90def9684
+pt_core_news_lg @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_lg-3.8.0/pt_core_news_lg-3.8.0.tar.gz
 pt_core_news_md @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_md-3.8.0/pt_core_news_md-3.8.0-py3-none-any.whl#sha256=54382cda034e41f3ec605ceeb924cd6cfdbced00a65f7afa12218520ba7008c5
 pt_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.8.0/pt_core_news_sm-3.8.0-py3-none-any.whl#sha256=c304fa04db3af73cd08a250feacf560506e15a2ec2469bd1b09f06847f6b455c
 pydantic==2.11.4
